@@ -1,0 +1,2 @@
+#define ASSET_PATH  "@ASSET_PATH@"
+#define SHADER_PATH "@SHADER_PATH@"

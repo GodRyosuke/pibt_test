@@ -1,0 +1,37 @@
+# Base style is Google
+BasedOnStyle: Google
+IndentWidth: 4
+Language:        Cpp
+# BasedOnStyle:  Google
+AccessModifierOffset: -4
+AlignAfterOpenBracket: Align
+AlignArrayOfStructures: Right
+
+# Force pointers to the type for C++
+DerivePointerAlignment: false
+PointerAlignment: Left
+AllowShortBlocksOnASingleLine: Always 
+# AllowShortLambdasOnASingleLine: All
+
+AlignConsecutiveAssignments: true   # "="
+AlignConsecutiveDeclarations: true  # 宣言
+AlignConsecutiveMacros: true        # マクロ
+AlignTrailingComments: true         # コメント
+
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterClass: true              # classの後
+  AfterControlStatement: false  # 制御文の後
+  AfterEnum: true               # enumの後
+  AfterFunction: true           # 関数の後
+  AfterStruct: true             # structの後
+  AfterUnion: true              # unionの後
+  AfterExternBlock: false       # externの後
+  BeforeCatch: false            # catchの前
+  BeforeElse: false             # elseの前
+  BeforeLambdaBody: false
+
+# No column limit
+ColumnLimit: 0
+
+IncludeBlocks: Preserve
