@@ -5,9 +5,9 @@
 #include "shader.hpp"
 
 namespace wander_csm_test {
-MeshComponent::MeshComponent(Game& game, const std::string& ownerId, const Mesh& mesh)
+MeshComponent::MeshComponent(Game& game, const std::string& ownerId, const Mesh& mesh, const Shader& shader)
     : Component(game, ownerId),
-      m_shader(game.getShader("testMeshShader")),
+      m_shader(shader),
       m_mesh(mesh)
 {
 }

@@ -11,7 +11,7 @@ TestMeshActor::TestMeshActor(Game& game)
 {
     setPosition(wu::Vec3(0.0, 0.0, 1.0));
 
-    MeshComponent& meshComponent = game.createMeshComponent(getId(), std::string(ASSET_PATH) + "TestCube/ConcreteBox.obj");
+    MeshComponent& meshComponent = game.createMeshComponent(getId(), std::string(ASSET_PATH) + "TestCube/ConcreteBox.obj", "testMeshShader");
     addComponent(meshComponent);
 }
 

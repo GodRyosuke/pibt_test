@@ -11,7 +11,7 @@ class Mesh;
 class MeshComponent : public Component
 {
 public:
-    MeshComponent(Game& game, const std::string& ownerId, const Mesh& mesh);
+    MeshComponent(Game& game, const std::string& ownerId, const Mesh& mesh, const Shader& shader);
     void draw();
 
 private:

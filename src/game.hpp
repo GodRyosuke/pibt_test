@@ -45,7 +45,7 @@ public:
 
     double             getDeltaT() const { return m_deltaT; }
     const std::string& getCameraId() const { return m_cameraId; }
-    MeshComponent&     createMeshComponent(const std::string& ownerId, const std::string& meshFilePath);
+    MeshComponent&     createMeshComponent(const std::string& ownerId, const std::string& meshFilePath, const std::string& shaderName);
     MeshComponent&     getMeshComponent(const std::string& id);
 
 private:

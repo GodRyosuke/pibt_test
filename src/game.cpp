@@ -286,10 +286,10 @@ void Game::draw()
     glfwSwapBuffers(m_glfwWindow);
 }
 
-MeshComponent& Game::createMeshComponent(const std::string& ownerId, const std::string& meshFilePath)
+MeshComponent& Game::createMeshComponent(const std::string& ownerId, const std::string& meshFilePath, const std::string& shaderName)
 {
     const auto&                    mesh    = loadMesh(meshFilePath);
-    std::unique_ptr<MeshComponent> compPtr = std::make_unique<MeshComponent>(*this, ownerId, mesh);
+    std::unique_ptr<MeshComponent> compPtr = std::make_unique<MeshComponent>(*this, ownerId, mesh, getShader(shaderName));
 
     const std::string spriteId = compPtr->getId();
     auto&             compRef  = *compPtr;
