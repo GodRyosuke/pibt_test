@@ -3,7 +3,9 @@
 #include <string>
 #include <vector>
 
-namespace wander_editor {
+#define STB_IMAGE_IMPLEMENTATION
+
+namespace wander_csm_test {
 class Texture
 {
 public:
@@ -26,4 +28,4 @@ private:
     int          m_width;
     int          m_height;
 };
-}  // namespace wander_editor
+}  // namespace wander_csm_test

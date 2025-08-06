@@ -8,7 +8,7 @@
 
 #include "gl.hpp"
 
-namespace wander_editor {
+namespace wander_csm_test {
 Texture::Texture(const std::string& filePath)
     : m_data(0),
       m_unit(GL_TEXTURE0),
@@ -113,4 +113,4 @@ void Texture::unbindTexture() const
 {
     glBindTexture(m_data, 0);
 }
-}  // namespace wander_editor
+}  // namespace wander_csm_test
