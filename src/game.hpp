@@ -15,6 +15,7 @@ class Mesh;
 class Shader;
 class TextureShadowMap;
 class MeshComponent;
+class Texture;
 
 class Game
 {
@@ -39,7 +40,8 @@ public:
         }
         return static_cast<T&>(*iter->second);
     }
-    const Mesh& loadMesh(const std::string& meshPath);
+    const Mesh&    loadMesh(const std::string& meshPath);
+    const Texture& loadTexture(const std::string& meshPath);
 
     double             getDeltaT() const { return m_deltaT; }
     const std::string& getCameraId() const { return m_cameraId; }
@@ -71,10 +73,11 @@ private:
 
     InputEvent m_inputEvent;
 
-    std::unique_ptr<Grid>                                    m_grid;
-    std::unordered_map<std::string, std::unique_ptr<Mesh>>   m_meshes;
-    std::unordered_map<std::string, std::unique_ptr<Shader>> m_shaders;
-    std::unique_ptr<TextureShadowMap>                        m_textureShadowMap;
+    std::unique_ptr<Grid>                                     m_grid;
+    std::unordered_map<std::string, std::unique_ptr<Mesh>>    m_meshes;
+    std::unordered_map<std::string, std::unique_ptr<Texture>> m_textures;
+    std::unordered_map<std::string, std::unique_ptr<Shader>>  m_shaders;
+    std::unique_ptr<TextureShadowMap>                         m_textureShadowMap;
 
     std::unordered_map<std::string, std::unique_ptr<MeshComponent>> m_meshComponents;
 

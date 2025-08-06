@@ -12,6 +12,7 @@
 #include "math.h"
 #include "mesh.hpp"
 #include "shader.hpp"
+#include "texture.hpp"
 #include "texture_shadow_map.hpp"
 #include "util/wander_math.hpp"
 #include "vertex_array.hpp"
@@ -136,6 +137,18 @@ const Mesh& Game::loadMesh(const std::string& meshPath)
         const auto& meshRef = *meshPtr;
         m_meshes.emplace(meshPath, std::move(meshPtr));
         return meshRef;
+    }
+    return *iter->second;
+}
+
+const Texture& Game::loadTexture(const std::string& path)
+{
+    auto iter = m_textures.find(path);
+    if (iter == m_textures.end()) {
+        auto        ptr = std::make_unique<Texture>(path);
+        const auto& ref = *ptr;
+        m_textures.emplace(path, std::move(ptr));
+        return ref;
     }
     return *iter->second;
 }
