@@ -2,6 +2,7 @@
 #include <iostream>
 #include <stdexcept>
 #include "actor/camera_actor.hpp"
+#include "actor/localization_map_actor.hpp"
 #include "actor/test_mesh_actor.hpp"
 #define _USE_MATH_DEFINES  // for C++
 #include <cassert>
@@ -68,6 +69,7 @@ void Game::init()
     };
     compileShader("testMeshShader", std::string(SHADER_PATH) + "test_mesh.vert", std::string(SHADER_PATH) + "test_mesh.frag");
     compileShader("spriteShader", std::string(SHADER_PATH) + "test_mesh.vert", std::string(SHADER_PATH) + "sprite.frag");
+    compileShader("localizationMapShader", std::string(SHADER_PATH) + "test_mesh.vert", std::string(SHADER_PATH) + "localization_map.frag");
 
     m_textureShadowMap = std::move(std::make_unique<TextureShadowMap>(1024, 1024));
 
@@ -78,17 +80,17 @@ void Game::init()
     // initialize light view and ortho projection matrix for shadow
     m_lightView  = std::move(wu::Mat4::view(wu::Vec3(100, 100, 100), wu::Vec3(), wu::Vec3(0, 0, 1)));
     m_lightOrtho = std::move(wu::Mat4::orthogonal(50, -50, 50, -50, 0.1, 200));
-
-    addActor(std::move(std::make_unique<TestMeshActor>(*this)));
-    auto camera = std::make_unique<CameraActor>(*this);
-    m_cameraId  = camera->getId();
-    addActor(std::move(camera));
 }
 
 void Game::loadGameObjects()
 {
+    addActor(std::move(std::make_unique<TestMeshActor>(*this)));
+    addActor(std::move(std::make_unique<LocalizationMapActor>(*this)));
+    auto camera = std::make_unique<CameraActor>(*this);
+    m_cameraId  = camera->getId();
+    addActor(std::move(camera));
+
     m_grid = std::move(std::make_unique<Grid>());
-    m_meshes.emplace("plane", std::move(std::make_unique<Mesh>(std::string(ASSET_PATH) + "plane/plane.fbx")));
 }
 
 void Game::updateDeltaT()
@@ -226,36 +228,6 @@ void Game::draw()
     // render testMesh
     for (const auto& meshComp : m_meshComponents) {
         meshComp.second->draw();
-    }
-
-    // render plane
-    for (int x = -2; x <= 2; x++) {
-        for (int y = -2; y <= 2; y++) {
-            const auto& shader = m_shaders["testMeshShader"];
-            shader->useProgram();
-
-            // set test cube model transforms
-            wu::Mat4 translation = wu::Mat4::translation({float(x * 5), float(y * 5), 0.f});
-            shader->setMatrix4Uniform("modelTransform", translation);
-
-            // set camera parameters
-            const auto& cameraActor = getActor<CameraActor>(m_cameraId);
-            shader->setMatrix4Uniform("cameraViewProj", cameraActor.getProjMat() * cameraActor.getViewMat());
-            shader->setVector3Uniform("eyeWorldPos", cameraActor.getPosition());
-
-            shader->setVector4Uniform("color", {0.5, 0.3, 1.0, 1.0});
-
-            const auto& mesh = m_meshes["plane"];
-            mesh->getVAO().setActive();
-            for (std::size_t subMeshIdx = 0; subMeshIdx < mesh->getSubMeshNum(); subMeshIdx++) {
-                const auto& subMesh = mesh->getSubMeshEntry(subMeshIdx);
-                glDrawElementsBaseVertex(GL_TRIANGLES,
-                                         subMesh.m_numIndices,
-                                         GL_UNSIGNED_INT,
-                                         (void*)(sizeof(unsigned int) * subMesh.m_baseIndex),
-                                         subMesh.m_baseVertex);
-            }
-        }
     }
 
     // render grid
