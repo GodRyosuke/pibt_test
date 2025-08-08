@@ -85,6 +85,11 @@ Texture::Texture(Texture&& other) noexcept
     other.m_height = 0;
 }
 
+Texture::~Texture()
+{
+    glDeleteTextures(1, &m_data);
+}
+
 Texture& Texture::operator=(Texture&& other) noexcept
 {
     if (this == &other) {

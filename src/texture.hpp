@@ -14,6 +14,7 @@ public:
     Texture(const std::vector<unsigned char>& bitMap, int width, int height);
     Texture(const Texture&) = delete;
     Texture(Texture&& other) noexcept;
+    ~Texture();
     Texture& operator=(const Texture&) = delete;
     Texture& operator=(Texture&& other) noexcept;
 
