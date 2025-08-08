@@ -107,7 +107,7 @@ void Game::updateDeltaT()
     m_lastTime     = newTime;
 }
 
-Shader& Game::getShader(const std::string& name)
+const Shader& Game::getShader(const std::string& name)
 {
     auto iter = m_shaders.find(name);
     if (iter != m_shaders.end()) {

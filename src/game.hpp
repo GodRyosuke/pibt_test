@@ -28,7 +28,7 @@ public:
     int  getScreenHeight() const { return m_screenHeight; }
     bool isChangedScreenSize() const { return m_isChangedScreenSize; }
 
-    Shader& getShader(const std::string& name);
+    const Shader& getShader(const std::string& name);
 
     void addActor(std::unique_ptr<Actor>&& actor);
     template <class T>
