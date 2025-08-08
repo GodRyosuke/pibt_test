@@ -1,6 +1,7 @@
 #include "shader.hpp"
 
 #include <fstream>
+#include <string>
 #include <iostream>
 #include <sstream>
 #include "gl.hpp"
@@ -37,10 +38,9 @@ static bool compileShader(const std::string& filepath, GLenum shaderType, GLuint
         glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
 
         if (status != GL_TRUE) {
-            char buffer[512];
-            memset(buffer, 0, 512);
-            glGetShaderInfoLog(shader, 511, nullptr, buffer);
-            printf("GLSL Compile Failed:\n%s", buffer);
+            std::vector<char> errorLog(512, 0);
+            glGetShaderInfoLog(shader, 511, nullptr, errorLog.data());
+            std::cout << "GLSL Compile Failed: " << std::string(errorLog.data()) << std::endl;
             return false;
         }
     } else {
@@ -76,11 +76,9 @@ bool Shader::createShaderProgram(const std::string& vertFilePath, const std::str
     // Query the link status
     glGetProgramiv(m_shaderProgram, GL_LINK_STATUS, &status);
     if (status != GL_TRUE) {
-        char buffer[512];
-        memset(buffer, 0, 512);
-        glGetProgramInfoLog(m_shaderProgram, 511, nullptr, buffer);
-        std::string err_msg = buffer;
-        std::cout << "GLSL Link Status: " << err_msg << std::endl;
+        std::vector<char> errorLog(512, 0);
+        glGetProgramInfoLog(m_shaderProgram, 511, nullptr, errorLog.data());
+        std::cout << "GLSL Link Status: " << std::string(errorLog.data()) << std::endl;
         return false;
     }
 
