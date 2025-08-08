@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -24,9 +25,10 @@ public:
     int  getHeight() const { return m_height; }
 
 private:
-    unsigned int m_data;
-    unsigned int m_unit;
-    int          m_width;
-    int          m_height;
+    unsigned int                   m_data;
+    unsigned int                   m_unit;
+    int                            m_width;
+    int                            m_height;
+    std::unique_ptr<unsigned char> m_pictureData;
 };
 }  // namespace wander_csm_test

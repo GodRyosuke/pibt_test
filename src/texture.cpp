@@ -18,9 +18,9 @@ Texture::Texture(const std::string& filePath)
     // Load from file
     int numColCh = 0;
     stbi_set_flip_vertically_on_load(true);
-    unsigned char* pictureData = stbi_load(filePath.c_str(), &m_width, &m_height, &numColCh, 0);
+    m_pictureData = std::unique_ptr<unsigned char>(stbi_load(filePath.c_str(), &m_width, &m_height, &numColCh, 0));
 
-    if (!pictureData) {
+    if (!m_pictureData) {
         throw std::runtime_error("failed to load texture: " + filePath);
     }
 
@@ -43,10 +43,8 @@ Texture::Texture(const std::string& filePath)
     } else {
         throw std::runtime_error("failed to load texture: " + filePath + ". Unsupported color ch: " + std::to_string(numColCh));
     }
-    glTexImage2D(GL_TEXTURE_2D, 0, colorCh, m_width, m_height, 0, colorCh, GL_UNSIGNED_BYTE, pictureData);
-    // Generates MipMaps
-    glGenerateMipmap(GL_TEXTURE_2D);
-    stbi_image_free(pictureData);
+    glTexImage2D(GL_TEXTURE_2D, 0, colorCh, m_width, m_height, 0, colorCh, GL_UNSIGNED_BYTE, m_pictureData.get());
+    glGenerateMipmap(GL_TEXTURE_2D);  // Generates MipMaps
 }
 
 Texture::Texture(const unsigned char* bitMap, int width, int height)
