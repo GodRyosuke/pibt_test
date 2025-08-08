@@ -1,4 +1,5 @@
 #include "camera_actor.hpp"
+#include <cmath>
 #include "game.hpp"
 
 namespace wander_csm_test {
