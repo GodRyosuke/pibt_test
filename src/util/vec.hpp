@@ -27,6 +27,7 @@ public:
     void         normalize();
     float        norm() const;
     const float* getPtr() const { &m_x; }
+    void         operator=(const Vec3& vec);
     Vec3         operator+(const Vec3& vec) const;
     void         operator+=(const Vec3& vec);
     Vec3         operator-(const Vec3& vec) const;
