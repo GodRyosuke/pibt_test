@@ -8,6 +8,7 @@ class Vec4
 public:
     Vec4();
     Vec4(float x, float y, float z, float w);
+    Vec4(class Vec3, float w);
     const float* getPtr() const { return &m_x; }
 
 private:
