@@ -70,6 +70,7 @@ void Game::init()
     compileShader("testMeshShader", std::string(SHADER_PATH) + "test_mesh.vert", std::string(SHADER_PATH) + "test_mesh.frag");
     compileShader("spriteShader", std::string(SHADER_PATH) + "test_mesh.vert", std::string(SHADER_PATH) + "sprite.frag");
     compileShader("localizationMapShader", std::string(SHADER_PATH) + "test_mesh.vert", std::string(SHADER_PATH) + "localization_map.frag");
+    compileShader("gridShader", std::string(SHADER_PATH) + "grid.vert", std::string(SHADER_PATH) + "grid.frag");
 
     m_textureShadowMap = std::move(std::make_unique<TextureShadowMap>(1024, 1024));
 
@@ -232,7 +233,7 @@ void Game::draw()
 
     // render grid
     {
-        const auto& shader = m_shaders["spriteShader"];
+        const auto& shader = m_shaders["gridShader"];
         shader->useProgram();
 
         // set test cube model transforms
@@ -241,8 +242,6 @@ void Game::draw()
         // set camera parameters
         const auto& cameraActor = getActor<CameraActor>(m_cameraId);
         shader->setMatrix4Uniform("cameraViewProj", cameraActor.getProjMat() * cameraActor.getViewMat());
-
-        shader->setVector4Uniform("color", {0.3, 0.3, 0.5, 1.0});
 
         m_grid->getVAO().setActive();
         glDrawElements(GL_LINES, m_grid->getNumIndexSize(), GL_UNSIGNED_INT, 0);
