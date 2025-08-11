@@ -2,6 +2,7 @@
 #include <iostream>
 #include <stdexcept>
 #include "actor/camera_actor.hpp"
+#include "actor/feature_map/feature_map_actor.hpp"
 #include "actor/localization_map_actor.hpp"
 #include "actor/robot_actor.hpp"
 #include "actor/test_mesh_actor.hpp"
@@ -90,6 +91,7 @@ void Game::loadGameObjects()
 {
     addActor(std::move(std::make_unique<TestMeshActor>(*this)));
     addActor(std::move(std::make_unique<RobotActor>(*this, "no1")));
+    addActor(std::move(std::make_unique<FeatureMapActor>(*this)));
     addActor(std::move(std::make_unique<LocalizationMapActor>(*this)));
     auto camera = std::make_unique<CameraActor>(*this);
     m_cameraId  = camera->getId();
