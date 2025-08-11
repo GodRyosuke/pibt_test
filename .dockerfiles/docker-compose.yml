@@ -6,6 +6,6 @@ services:
       dockerfile: format.Dockerfile
     container_name: clang-formatter
     working_dir: "/root/csm_test"
-    command: find . -type f \( -name "*.cpp" -o -name "*.hpp" -o -name "*.c" -o -name "*.h" \) -not -path "./build/*" -not -path "./.git/*" -not -path "./src/gl.hpp" -not -path "./src/stb_image.h" -not -path "./src/glad/*" -exec clang-format -i {} +
+    command: find . -type f \( -name "*.cpp" -o -name "*.hpp" -o -name "*.c" -o -name "*.h" \) -not -path "./build/*" -not -path "./.git/*" -not -path "./src/gl.hpp" -not -path "./src/nlohmann/json.hpp" -not -path "./src/stb_image.h" -not -path "./src/glad/*" -exec clang-format -i {} +
     volumes:
       - "../:/root/csm_test"
