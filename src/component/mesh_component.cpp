@@ -12,7 +12,7 @@ MeshComponent::MeshComponent(Game& game, const std::string& ownerId, const Mesh&
 {
 }
 
-void MeshComponent::draw()
+void MeshComponent::draw() const
 {
     m_shader.useProgram();
 

@@ -13,8 +13,8 @@ class MeshComponent : public Component
 {
 public:
     MeshComponent(Game& game, const std::string& ownerId, const Mesh& mesh, const Shader& shader);
-    void draw();
-    void setTexture(const std::string& textureName) { m_textureName = textureName; }
+    virtual void draw() const;
+    void         setTexture(const std::string& textureName) { m_textureName = textureName; }
 
 private:
     const Shader& m_shader;
