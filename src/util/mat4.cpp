@@ -20,6 +20,13 @@ Mat4::Mat4(Mat4&& input) noexcept
     m_data = std::move(input.m_data);
 }
 
+float Mat4::operator()(int row, int col) const
+{
+    assert(row >= 0 && row < 4);
+    assert(col >= 0 && col < 4);
+    return m_data[row * 4 + col];
+}
+
 Mat4& Mat4::operator=(const Mat4& input)
 {
     Mat4 result;

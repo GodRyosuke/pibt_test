@@ -12,9 +12,10 @@ public:
     Mat4(const Mat4&);
     Mat4(Mat4&&) noexcept;
     Mat4(const std::vector<double>& input);
+    const float* getPtr() const { return m_data.data(); }
+    float        operator()(int row, int col) const;
     Mat4&        operator=(const Mat4&);
     Mat4&        operator=(Mat4&&) noexcept;
-    const float* getPtr() const { return m_data.data(); }
     Mat4         operator*(const Mat4& other) const;
     void         operator=(const std::vector<double>&);
     void         transpose();
