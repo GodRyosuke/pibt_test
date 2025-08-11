@@ -59,6 +59,8 @@ public:
     float norm() const;
     Vec2  operator+(const Vec2& vec) const;
     Vec2  operator-(const Vec2& vec) const;
+    Vec2  operator*(float scalar) const;
+    Vec2  operator/(float scalar) const;
 
     float&       x() { return m_x; }
     float&       y() { return m_y; }
