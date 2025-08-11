@@ -1,6 +1,7 @@
 find_package(glfw3 CONFIG REQUIRED)
 find_package(assimp REQUIRED)
 find_package(Boost COMPONENTS uuid operators lexical_cast REQUIRED)
+find_package(yaml-cpp REQUIRED)
 
 set(ASSET_PATH ${CMAKE_SOURCE_DIR}/asset/)
 set(SHADER_PATH ${PROJECT_SOURCE_DIR}/src/shader/)
@@ -14,6 +15,7 @@ set(DEPEND_LIBRARIES
     glfw 
     assimp::assimp
     boost::boost
+    yaml-cpp::yaml-cpp
 )
 
 file(GLOB_RECURSE SOURCE_FILES CONFIGURE_DEPENDS
