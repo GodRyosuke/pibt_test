@@ -3,10 +3,8 @@
 #include <bitset>
 #include <fstream>
 #include <iostream>
-
-#include "stb_image.h"
-
 #include "gl.hpp"
+#include "stb_image.h"
 
 namespace wander_csm_test {
 Texture::Texture(const std::string& filePath)
@@ -16,9 +14,8 @@ Texture::Texture(const std::string& filePath)
       m_height(0)
 {
     // Load from file
-    int numColCh = 0;
     stbi_set_flip_vertically_on_load(true);
-    m_pictureData = std::unique_ptr<unsigned char>(stbi_load(filePath.c_str(), &m_width, &m_height, &numColCh, 0));
+    m_pictureData = std::unique_ptr<unsigned char>(stbi_load(filePath.c_str(), &m_width, &m_height, &m_numChannels, 0));
 
     if (!m_pictureData) {
         throw std::runtime_error("failed to load texture: " + filePath);
@@ -35,14 +32,14 @@ Texture::Texture(const std::string& filePath)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
     int colorCh = 0;
-    if (numColCh == 4) {
+    if (m_numChannels == 4) {
         colorCh = GL_RGBA;
-    } else if (numColCh == 3) {
+    } else if (m_numChannels == 3) {
         colorCh = GL_RGB;
-    } else if (numColCh == 1) {
+    } else if (m_numChannels == 1) {
         colorCh = GL_RED;
     } else {
-        throw std::runtime_error("failed to load texture: " + filePath + ". Unsupported color ch: " + std::to_string(numColCh));
+        throw std::runtime_error("failed to load texture: " + filePath + ". Unsupported color ch: " + std::to_string(m_numChannels));
     }
     glTexImage2D(GL_TEXTURE_2D, 0, colorCh, m_width, m_height, 0, colorCh, GL_UNSIGNED_BYTE, m_pictureData.get());
     glGenerateMipmap(GL_TEXTURE_2D);  // Generates MipMaps

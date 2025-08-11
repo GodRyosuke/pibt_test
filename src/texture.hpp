@@ -16,6 +16,10 @@ public:
     Texture(const Texture&) = delete;
     Texture(Texture&& other) noexcept;
     ~Texture();
+    unsigned char getPixel(int x, int y) const
+    {
+        return m_pictureData.get()[(y * m_width + x) * m_numChannels];
+    }
     Texture& operator=(const Texture&) = delete;
     Texture& operator=(Texture&& other) noexcept;
 
@@ -29,6 +33,7 @@ private:
     unsigned int                   m_unit;
     int                            m_width;
     int                            m_height;
+    int                            m_numChannels;
     std::unique_ptr<unsigned char> m_pictureData;
 };
 }  // namespace wander_csm_test
