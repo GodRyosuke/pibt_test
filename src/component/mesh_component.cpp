@@ -8,7 +8,8 @@ namespace wander_csm_test {
 MeshComponent::MeshComponent(Game& game, const std::string& ownerId, const Mesh& mesh, const Shader& shader)
     : Component(game, ownerId),
       m_shader(shader),
-      m_mesh(mesh)
+      m_mesh(mesh),
+      m_color(wu::Vec4(0.5, 0.5, 0.5, 1.0))
 {
 }
 
@@ -24,7 +25,7 @@ void MeshComponent::draw() const
     m_shader.setMatrix4Uniform("cameraViewProj", cameraActor.getProjMat() * cameraActor.getViewMat());
     m_shader.setVector3Uniform("eyeWorldPos", cameraActor.getPosition());
 
-    m_shader.setVector4Uniform("color", {0.5, 0.3, 1.0, 1.0});
+    m_shader.setVector4Uniform("vertexColor", m_color);
 
     if (!m_textureName.empty()) {
         const auto& texture = m_game.loadTexture(m_textureName);

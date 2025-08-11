@@ -16,6 +16,7 @@ uniform mat4 lightView;
 // uniform mat4 OrtholightViewProj;
 uniform mat4 orthoLightProj;
 // uniform mat4 LightProj;
+uniform vec4 vertexColor;
 
 // out vec4 OrthoLightSpacePos;                                                    
 out vec2 texCoord0;
@@ -23,6 +24,7 @@ out vec3 normal0;
 out vec3 tangent0;
 out vec3 worldPos0;
 out vec4 lightSpacePos0;
+out vec4 diffuseColor;
 
 void main()
 {
@@ -36,4 +38,5 @@ void main()
 	lightSpacePos0 = orthoLightProj * lightView * modelTransform * vec4(Position, 1.0);
 	// Spot Light
 	// PersLightSpacePos = CameraProj * LightView * ModelTransform * vec4(Position, 1.0);
+	diffuseColor = vertexColor;
 }
