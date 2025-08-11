@@ -1,9 +1,9 @@
 #include "shader.hpp"
 
 #include <fstream>
-#include <string>
 #include <iostream>
 #include <sstream>
+#include <string>
 #include "gl.hpp"
 
 namespace wander_csm_test {
