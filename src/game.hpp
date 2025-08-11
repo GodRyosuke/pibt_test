@@ -15,6 +15,7 @@ class Mesh;
 class Shader;
 class TextureShadowMap;
 class MeshComponent;
+class InstancedMeshComponent;
 class Texture;
 
 class Game
@@ -43,10 +44,19 @@ public:
     const Mesh&    loadMesh(const std::string& meshPath);
     const Texture& loadTexture(const std::string& meshPath);
 
-    double             getDeltaT() const { return m_deltaT; }
-    const std::string& getCameraId() const { return m_cameraId; }
-    MeshComponent&     createMeshComponent(const std::string& ownerId, const std::string& meshFilePath, const std::string& shaderName);
-    MeshComponent&     getMeshComponent(const std::string& id);
+    double                  getDeltaT() const { return m_deltaT; }
+    const std::string&      getCameraId() const { return m_cameraId; }
+    MeshComponent&          createMeshComponent(const std::string& ownerId, const std::string& meshFilePath, const std::string& shaderName);
+    InstancedMeshComponent& createInstancedMeshComponent(const std::string& ownerId, const std::string& meshFilePath, const std::string& shaderName);
+    template <typename T>
+    T& getMeshComponent(const std::string& id)
+    {
+        auto iter = m_meshComponents.find(id);
+        if (iter == m_meshComponents.end()) {
+            throw std::runtime_error("actor " + id + " is not found");
+        }
+        return static_cast<T&>(*iter->second);
+    }
 
 private:
     void input();

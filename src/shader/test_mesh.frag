@@ -1,12 +1,12 @@
 #version 450
 
-uniform vec4 color;
 uniform vec3 eyeWorldPos;
 
 in vec4 LightSpacePos;
 in vec2 texCoord0;
 in vec3 normal0;
 in vec3 worldPos0;
+in vec4 diffuseColor;
 
 out vec4 fragColor;
 
@@ -14,8 +14,7 @@ void main()
 {
     vec3 lightDirection = vec3(1.0, 0.0, -1.0);
     vec3 ambientLight = vec3(0.2, 0.2, 0.2);
-	vec3 diffuseColor = vec3(0.5, 0.5, 0.5);
-	vec3 specColor = vec3(0.5f, 0.5f, 1.f);
+	vec3 specColor = vec3(0.0);
 	float specPower = 200.f;
 
     // Surface normal
@@ -33,7 +32,7 @@ void main()
         // 光が届かないところはそもそもspecの光沢が発生しない
         vec3 specular = specColor * pow(max(dot(R, V), 0.0), 1.2);
         phong += specular;
-		vec3 diffuse = diffuseColor * NdotL;
+		vec3 diffuse = diffuseColor.xyz * NdotL;
 		phong += diffuse;
 	}
 

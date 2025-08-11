@@ -5,6 +5,7 @@
 #include "actor/localization_map_actor.hpp"
 #include "actor/robot_actor.hpp"
 #include "actor/test_mesh_actor.hpp"
+#include "component/instanced_mesh_component.hpp"
 #define _USE_MATH_DEFINES  // for C++
 #include <cassert>
 #include <chrono>
@@ -72,6 +73,7 @@ void Game::init()
     compileShader("spriteShader", std::string(SHADER_PATH) + "test_mesh.vert", std::string(SHADER_PATH) + "sprite.frag");
     compileShader("localizationMapShader", std::string(SHADER_PATH) + "test_mesh.vert", std::string(SHADER_PATH) + "localization_map.frag");
     compileShader("gridShader", std::string(SHADER_PATH) + "grid.vert", std::string(SHADER_PATH) + "grid.frag");
+    compileShader("instancedMeshShader", std::string(SHADER_PATH) + "instanced_mesh.vert", std::string(SHADER_PATH) + "test_mesh.frag");
 
     m_textureShadowMap = std::move(std::make_unique<TextureShadowMap>(1024, 1024));
 
@@ -270,12 +272,14 @@ MeshComponent& Game::createMeshComponent(const std::string& ownerId, const std::
     return compRef;
 }
 
-MeshComponent& Game::getMeshComponent(const std::string& id)
+InstancedMeshComponent& Game::createInstancedMeshComponent(const std::string& ownerId, const std::string& meshFilePath, const std::string& shaderName)
 {
-    auto iter = m_meshComponents.find(id);
-    if (iter == m_meshComponents.end()) {
-        throw std::runtime_error("mesh component " + id + " is not found");
-    }
-    return *iter->second;
+    const auto&                             mesh    = loadMesh(meshFilePath);
+    std::unique_ptr<InstancedMeshComponent> compPtr = std::make_unique<InstancedMeshComponent>(*this, ownerId, mesh, getShader(shaderName));
+
+    const std::string spriteId = compPtr->getId();
+    auto&             compRef  = *compPtr;
+    m_meshComponents.emplace(spriteId, std::move(compPtr));
+    return compRef;
 }
 }  // namespace wander_csm_test
