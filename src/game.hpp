@@ -34,7 +34,7 @@ public:
 
     void addActor(std::unique_ptr<Actor>&& actor);
     template <class T>
-    T& getActor(const std::string& id)
+    T& getActor(const std::string& id) const
     {
         auto iter = m_actors.find(id);
         if (iter == m_actors.end()) {
