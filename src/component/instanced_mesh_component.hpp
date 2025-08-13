@@ -36,6 +36,7 @@ public:
     InstancedMeshComponent(const InstancedMeshComponent&) = delete;
     void        draw() const override;
     void        addData(const InstancedMeshCompData& data);
+    void        clearData() { m_instanceData.clear(); }
     std::size_t getNumRects() { return m_instanceData.size(); }
 
 private:
