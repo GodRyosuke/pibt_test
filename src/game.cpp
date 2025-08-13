@@ -5,7 +5,6 @@
 #include "actor/feature_map/feature_map_actor.hpp"
 #include "actor/localization_map_actor.hpp"
 #include "actor/robot_actor.hpp"
-#include "actor/test_mesh_actor.hpp"
 #include "component/instanced_mesh_component.hpp"
 #include "rrt.hpp"
 #define _USE_MATH_DEFINES  // for C++
@@ -90,10 +89,10 @@ void Game::init()
 
 void Game::loadGameObjects()
 {
-    addActor(std::move(std::make_unique<TestMeshActor>(*this)));
-    addActor(std::move(std::make_unique<RobotActor>(*this, "no1")));
     addActor(std::move(std::make_unique<FeatureMapActor>(*this)));
-    addActor(std::move(std::make_unique<LocalizationMapActor>(*this)));
+    auto              localizationMapActor = std::make_unique<LocalizationMapActor>(*this);
+    const std::string localizatoinActorId  = localizationMapActor->getId();
+    addActor(std::move(localizationMapActor));
     auto camera = std::make_unique<CameraActor>(*this);
     m_cameraId  = camera->getId();
     addActor(std::move(camera));
@@ -101,7 +100,15 @@ void Game::loadGameObjects()
     m_grid = std::move(std::make_unique<Grid>());
     m_rrt  = std::move(std::make_unique<RRT>(*this, localizatoinActorId));
 
-    addActor(std::move(std::make_unique<RobotActor>(*this, "no1", localizatoinActorId)));
+    std::unique_ptr<RobotActor> robotActor;
+    robotActor = std::make_unique<RobotActor>(*this, "no1", localizatoinActorId, wu::Vec2(0, -2), wu::Vec3(65. / 255., 105. / 255., 225. / 255.));
+    robotActor->setGoal(wu::Vec2(8, 3.5));
+    robotActor->setGoal(wu::Vec2(8, 7));
+    addActor(std::move(robotActor));
+
+    robotActor = std::make_unique<RobotActor>(*this, "no2", localizatoinActorId, wu::Vec2(-9.5, 0), wu::Vec3(102. / 255., 205. / 255., 170. / 255.));
+    robotActor->setGoal(wu::Vec2(0, 3.5));
+    addActor(std::move(robotActor));
 }
 
 void Game::updateDeltaT()
