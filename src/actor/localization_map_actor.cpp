@@ -74,4 +74,27 @@ bool LocalizationMapActor::isAvailablePixelSpace(const wu::Vec2& pos) const
 
     return true;
 }
+
+std::vector<wu::Vec2> LocalizationMapActor::getPassPixels() const
+{
+    const auto&  localizationTex = m_game.loadTexture(m_localizationImgPath);
+    const double imgWidth        = localizationTex.getWidth();
+    const double imgHeight       = localizationTex.getHeight();
+
+    std::vector<wu::Vec2> passPixels;
+    passPixels.reserve(imgHeight * imgWidth);
+    for (int y = 0; y < imgHeight; y++) {
+        for (int x = 0; x < imgWidth; x++) {
+            auto pixel = localizationTex.getPixel(x, y);
+            if (pixel < m_pathDetectionTh) {
+                // 通路ではない
+                continue;
+            }
+
+            passPixels.emplace_back(wu::Vec2(x, y));
+        }
+    }
+
+    return passPixels;
+}
 }  // namespace wander_csm_test
