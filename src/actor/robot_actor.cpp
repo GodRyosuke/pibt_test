@@ -29,7 +29,14 @@ RobotActor::RobotActor(Game& game, const std::string& name, const std::string& l
 
 void RobotActor::updateActor()
 {
-    if (m_nextGoalIdx < 0) {
+    if ((m_goalQueue.size() != 0) && (m_nextGoalIdx == -1)) {
+        // 次の目的地への経路計画を実行
+        planGlobalPath(m_goalQueue.front());
+        m_goalQueue.pop();
+        return;
+    }
+
+    if (m_nextGoalIdx == -1) {
         return;
     }
     auto&        currentPos = getPosition();
