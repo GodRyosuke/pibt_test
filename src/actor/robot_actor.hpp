@@ -6,6 +6,14 @@ namespace wander_csm_test {
 class RobotActor : public Actor
 {
 public:
-    RobotActor(Game& game, const std::string& name);
+    RobotActor(Game& game, const std::string& name, const std::string& localizationMapId);
+
+private:
+    void planGlobalPath(const wu::Vec2& goal);
+
+    std::vector<wu::Vec3> m_globalPath;
+    std::string           m_localizatinMapActorId;
+    int                   m_nextGoalIdx;
+    double                m_angle;
 };
 }  // namespace wander_csm_test
