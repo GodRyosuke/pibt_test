@@ -31,7 +31,7 @@ LocalizationMapActor::LocalizationMapActor(Game& game)
     addComponent(meshComponent);
 }
 
-bool LocalizationMapActor::isAvailableSpace(const wu::Vec2& pos) const
+bool LocalizationMapActor::isAvailableWorldSpace(const wu::Vec2& pos) const
 {
     // 左上原点 y軸下向きの座標系に変換
     const auto&  localizationTex = m_game.loadTexture(m_localizationImgPath);
