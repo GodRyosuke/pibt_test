@@ -8,18 +8,19 @@
 #include "rrt.hpp"
 
 namespace wander_csm_test {
-RobotActor::RobotActor(Game& game, const std::string& name, const std::string& localizationMapId)
+RobotActor::RobotActor(Game& game, const std::string& name, const std::string& localizationMapId, const wu::Vec2& initialPos, const wu::Vec3& color)
     : Actor(game, name),
       m_localizatinMapActorId(localizationMapId),
       m_velocity(0.5),
       m_nextGoalIdx(-1),
-      m_angle(wu::PI / 2.0)
+      m_angle(wu::PI / 2.0),
+      m_color(color)
 {
     MeshComponent& meshComponent = game.createMeshComponent(getId(), std::string(ASSET_PATH) + "robot_agent/robot_agent.obj", "testMeshShader");
-    meshComponent.setColor(wu::Vec3(0.2, 0.2, 0.9));
+    meshComponent.setColor(m_color);
     addComponent(meshComponent);
 
-    setPosition(wu::Vec3(0, -2, 0));
+    setPosition(wu::Vec3(initialPos.x(), initialPos.y(), 0));
     setScale(0.5 / 2.0);
 
     InstancedMeshComponent& instancedMeshComponent = game.createInstancedMeshComponent(getId(), std::string(ASSET_PATH) + "circle/circle.obj", "instancedMeshShader");
@@ -39,9 +40,9 @@ void RobotActor::updateActor()
     if (m_nextGoalIdx == -1) {
         return;
     }
-    auto&        currentPos = getPosition();
-    const double deltaT     = m_game.getDeltaT();
-    double nextGoalDist = (m_globalPath[m_nextGoalIdx] - currentPos).norm();
+    auto&        currentPos   = getPosition();
+    const double deltaT       = m_game.getDeltaT();
+    double       nextGoalDist = (m_globalPath[m_nextGoalIdx] - currentPos).norm();
     while (true) {
         if ((nextGoalDist > 0.3) && (m_nextGoalIdx < (m_globalPath.size() - 1))) {
             break;
