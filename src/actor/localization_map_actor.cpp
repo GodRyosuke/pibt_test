@@ -57,4 +57,21 @@ bool LocalizationMapActor::isAvailableWorldSpace(const wu::Vec2& pos) const
     }
     return true;
 }
+
+bool LocalizationMapActor::isAvailablePixelSpace(const wu::Vec2& pos) const
+{
+    const auto&  localizationTex = m_game.loadTexture(m_localizationImgPath);
+    const double imgWidth        = localizationTex.getWidth();
+    const double imgHeight       = localizationTex.getHeight();
+
+    if ((pos.x() < 0) || (pos.x() >= imgWidth) || (pos.y() < 0) || (pos.y() >= imgHeight)) {
+        return false;
+    }
+    auto pixel = localizationTex.getPixel(pos.x(), pos.y());
+    if (pixel < m_pathDetectionTh) {
+        return false;
+    }
+
+    return true;
+}
 }  // namespace wander_csm_test

@@ -10,6 +10,7 @@ class LocalizationMapActor : public Actor
 public:
     LocalizationMapActor(Game& game);
     bool                  isAvailableWorldSpace(const wu::Vec2& pos) const;
+    bool                  isAvailablePixelSpace(const wu::Vec2& pos) const;
 
 private:
     std::string   m_localizationImgPath;
