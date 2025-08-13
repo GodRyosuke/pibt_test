@@ -53,10 +53,8 @@ void CameraActor::inputActor(const InputEvent& InputEvent)
     if (InputEvent.getButtonState('Z') == InputEvent::PRESS) {
         if (m_isOrthoView) {
             toPerspective();
-            m_isOrthoView = false;
         } else {
             toOrthogonal();
-            m_isOrthoView = true;
         }
     }
 }
@@ -87,9 +85,13 @@ void CameraActor::updateTranslation(const InputEvent& inputEvent)
 
     double scrollYOffset = inputEvent.getScrollOffset().y();
     if (std::abs(scrollYOffset) > 1e-5) {
-        pos += forward * 0.1 * scrollYOffset;
-        m_target += forward * 0.1 * scrollYOffset;
-        m_orthoRight    = std::max(0.1, m_orthoRight - 0.1 * scrollYOffset);
+        if (m_isOrthoView) {
+            m_orthoRight = std::max(0.1, m_orthoRight - 0.1 * scrollYOffset);
+        } else {
+            pos += forward * 0.1 * scrollYOffset;
+            m_target += forward * 0.1 * scrollYOffset;
+        }
+
         m_needRecompute = true;
     }
 }
@@ -99,14 +101,18 @@ void CameraActor::updateRotation(const InputEvent& inputEvent)
     const double screenWidth  = static_cast<double>(m_game.getScreenWidth());
     const double screenHeight = static_cast<double>(m_game.getScreenHeight());
 
-    if (inputEvent.getButtonState(GLFW_MOUSE_BUTTON_MIDDLE) == InputEvent::PRESS) {
+    if ((inputEvent.getButtonState(GLFW_MOUSE_BUTTON_MIDDLE) == InputEvent::PRESS) ||
+        (inputEvent.getButtonState(GLFW_MOUSE_BUTTON_RIGHT) == InputEvent::PRESS)) {
         if (m_isOrthoView) {
             toPerspective();
-            m_isOrthoView = false;
+            m_horizontalAngle = 1.5750686699999981;
+            m_verticalAngle   = -0.94973491499999463;
         }
         inputEvent.setMousePosCenter();
     }
-    if (inputEvent.isChangedMousePos() && (inputEvent.getButtonState(GLFW_MOUSE_BUTTON_MIDDLE) == InputEvent::PRESSED)) {
+    if (inputEvent.isChangedMousePos() &&
+        ((inputEvent.getButtonState(GLFW_MOUSE_BUTTON_MIDDLE) == InputEvent::PRESSED) ||
+         (inputEvent.getButtonState(GLFW_MOUSE_BUTTON_RIGHT) == InputEvent::PRESSED))) {
         inputEvent.changeCursorVisibility(GLFW_CURSOR_HIDDEN);
         m_horizontalAngle += 0.3 * m_game.getDeltaT() * ((screenWidth / 2.) - inputEvent.getMousePos().x());
         m_verticalAngle += 0.3 * m_game.getDeltaT() * ((screenHeight / 2.) - inputEvent.getMousePos().y());
@@ -117,7 +123,8 @@ void CameraActor::updateRotation(const InputEvent& inputEvent)
         m_needRecompute = true;
         inputEvent.setMousePosCenter();
     }
-    if (inputEvent.getButtonState(GLFW_MOUSE_BUTTON_MIDDLE) == InputEvent::RELEASED) {
+    if ((inputEvent.getButtonState(GLFW_MOUSE_BUTTON_MIDDLE) == InputEvent::RELEASED) ||
+        (inputEvent.getButtonState(GLFW_MOUSE_BUTTON_RIGHT) == InputEvent::RELEASED)) {
         inputEvent.changeCursorVisibility(GLFW_CURSOR_NORMAL);
     }
 }
@@ -127,7 +134,9 @@ void CameraActor::toPerspective()
     double aspect   = static_cast<double>(m_game.getScreenHeight()) / static_cast<double>(m_game.getScreenWidth());
     m_projMat       = std::move(wu::Mat4::perspective(m_fov, aspect, m_near, m_far));
     m_up            = wu::Vec3(0, 0, 1);
+    m_target        = getPosition() + wu::Vec3(0, 1, -1);
     m_needRecompute = true;
+    m_isOrthoView   = false;
 }
 
 void CameraActor::toOrthogonal()
@@ -138,5 +147,6 @@ void CameraActor::toOrthogonal()
     m_up            = wu::Vec3(0, 1, 0);
     m_target        = getPosition() + wu::Vec3(0, 0, -1);
     m_needRecompute = true;
+    m_isOrthoView   = true;
 }
 }  // namespace wander_csm_test
