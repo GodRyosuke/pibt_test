@@ -11,6 +11,7 @@ namespace wander_csm_test {
 RobotActor::RobotActor(Game& game, const std::string& name, const std::string& localizationMapId)
     : Actor(game, name),
       m_localizatinMapActorId(localizationMapId),
+      m_velocity(0.5),
       m_nextGoalIdx(-1),
       m_angle(wu::PI / 2.0)
 {
@@ -43,6 +44,47 @@ RobotActor::RobotActor(Game& game, const std::string& name, const std::string& l
         instancedMeshComponent.addData(data);
     }
     addComponent(instancedMeshComponent);
+}
+
+void RobotActor::updateActor()
+{
+    if (m_nextGoalIdx < 0) {
+        return;
+    }
+    auto&        currentPos = getPosition();
+    const double deltaT     = m_game.getDeltaT();
+    double nextGoalDist = (m_globalPath[m_nextGoalIdx] - currentPos).norm();
+    while (true) {
+        if ((nextGoalDist > 0.3) && (m_nextGoalIdx < (m_globalPath.size() - 1))) {
+            break;
+        }
+        if ((nextGoalDist < 0.1) && (m_nextGoalIdx == (m_globalPath.size() - 1))) {
+            // 目的地へ到着
+            m_nextGoalIdx = -1;
+            std::cout << "Robot \"" << getName() << "\" has reached the destination: " << currentPos.x() << ", " << currentPos.y() << std::endl;
+            return;
+        }
+        if (m_nextGoalIdx == (m_globalPath.size() - 1)) {
+            break;
+        }
+        m_nextGoalIdx++;
+        nextGoalDist = (m_globalPath[m_nextGoalIdx] - currentPos).norm();
+    }
+
+    // pure pursuit法による制御
+    const auto& nextGoal      = m_globalPath[m_nextGoalIdx];
+    double      nextGoalAngle = std::atan2(nextGoal.y() - currentPos.y(), nextGoal.x() - currentPos.x());
+    if (nextGoalAngle < 0) {
+        nextGoalAngle += 2 * wu::PI;
+    }
+
+    double angleAlpha      = nextGoalAngle - m_angle;
+    double robotVelocity   = std::min((currentPos - m_globalPath[m_globalPath.size() - 1]).norm() * 0.3, m_velocity);
+    double angularVelocity = 2 * m_velocity * std::sin(angleAlpha) / nextGoalDist;
+
+    m_angle += angularVelocity * deltaT;
+    currentPos += wu::Vec3(std::cos(m_angle), std::sin(m_angle), 0) * robotVelocity * deltaT;
+    setRotation(m_angle - wu::PI / 2.0);
 }
 
 void RobotActor::planGlobalPath(const wu::Vec2& goal)

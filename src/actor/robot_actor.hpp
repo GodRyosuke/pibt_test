@@ -7,12 +7,14 @@ class RobotActor : public Actor
 {
 public:
     RobotActor(Game& game, const std::string& name, const std::string& localizationMapId);
+    void updateActor() override;
 
 private:
     void planGlobalPath(const wu::Vec2& goal);
 
     std::vector<wu::Vec3> m_globalPath;
     std::string           m_localizatinMapActorId;
+    double                m_velocity;
     int                   m_nextGoalIdx;
     double                m_angle;
 };
