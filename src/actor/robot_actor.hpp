@@ -13,6 +13,7 @@ private:
     void planGlobalPath(const wu::Vec2& goal);
 
     std::vector<wu::Vec3> m_globalPath;
+    std::string           m_instanceMeshCompId;
     std::string           m_localizatinMapActorId;
     double                m_velocity;
     int                   m_nextGoalIdx;

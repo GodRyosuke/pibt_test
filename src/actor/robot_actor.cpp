@@ -22,27 +22,8 @@ RobotActor::RobotActor(Game& game, const std::string& name, const std::string& l
     setPosition(wu::Vec3(0, -2, 0));
     setScale(0.5 / 2.0);
 
-    planGlobalPath(wu::Vec2(8, 3.5));
-
-    const auto toNodeModelTransform = [](const wu::Vec3& position) -> InstancedMeshComponent::ShaderMat4 {
-        const auto scale          = wu::Mat4::scale(wu::Vec3(0.3 / 2.0, 0.3 / 2.0, 0.3 / 2.0));
-        const auto translation    = wu::Mat4::translation(position);
-        wu::Mat4   modelTransform = translation * scale;
-        return {
-            modelTransform(0, 0), modelTransform(1, 0), modelTransform(2, 0), modelTransform(3, 0),
-            modelTransform(0, 1), modelTransform(1, 1), modelTransform(2, 1), modelTransform(3, 1),
-            modelTransform(0, 2), modelTransform(1, 2), modelTransform(2, 2), modelTransform(3, 2),
-            modelTransform(0, 3), modelTransform(1, 3), modelTransform(2, 3), modelTransform(3, 3)};
-    };
-
     InstancedMeshComponent& instancedMeshComponent = game.createInstancedMeshComponent(getId(), std::string(ASSET_PATH) + "circle/circle.obj", "instancedMeshShader");
-    for (const auto& path : m_globalPath) {
-        InstancedMeshComponent::InstancedMeshCompData data = {
-            toNodeModelTransform(wu::Vec3(path.x(), path.y(), 0.002)),
-            wu::Vec4(0.5, 0.5, 0.9, 0.5)};
-
-        instancedMeshComponent.addData(data);
-    }
+    m_instanceMeshCompId                           = instancedMeshComponent.getId();
     addComponent(instancedMeshComponent);
 }
 
@@ -97,6 +78,7 @@ void RobotActor::planGlobalPath(const wu::Vec2& goal)
 
     const auto& localizationMap = m_game.getActor<LocalizationMapActor>(m_localizatinMapActorId);
 
+    m_globalPath.clear();
     m_globalPath.reserve(globalPathPixelSpace.size());
     for (int i = globalPathPixelSpace.size() - 1; i >= 0; i--) {
         wu::Vec2 posWorldSpace = localizationMap.toWorldSpace(globalPathPixelSpace[i]);
@@ -104,5 +86,26 @@ void RobotActor::planGlobalPath(const wu::Vec2& goal)
     }
 
     m_nextGoalIdx = 0;
+
+    const auto toNodeModelTransform = [](const wu::Vec3& position) -> InstancedMeshComponent::ShaderMat4 {
+        const auto scale          = wu::Mat4::scale(wu::Vec3(0.3 / 2.0, 0.3 / 2.0, 0.3 / 2.0));
+        const auto translation    = wu::Mat4::translation(position);
+        wu::Mat4   modelTransform = translation * scale;
+        return {
+            modelTransform(0, 0), modelTransform(1, 0), modelTransform(2, 0), modelTransform(3, 0),
+            modelTransform(0, 1), modelTransform(1, 1), modelTransform(2, 1), modelTransform(3, 1),
+            modelTransform(0, 2), modelTransform(1, 2), modelTransform(2, 2), modelTransform(3, 2),
+            modelTransform(0, 3), modelTransform(1, 3), modelTransform(2, 3), modelTransform(3, 3)};
+    };
+
+    InstancedMeshComponent& instancedMeshComponent = m_game.getMeshComponent<InstancedMeshComponent>(m_instanceMeshCompId);
+    instancedMeshComponent.clearData();
+    for (const auto& path : m_globalPath) {
+        InstancedMeshComponent::InstancedMeshCompData data = {
+            toNodeModelTransform(wu::Vec3(path.x(), path.y(), 0.002)),
+            wu::Vec4(m_color.x(), m_color.y(), m_color.z(), 0.7)};
+
+        instancedMeshComponent.addData(data);
+    }
 }
 }  // namespace wander_csm_test
