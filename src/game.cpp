@@ -7,6 +7,7 @@
 #include "actor/robot_actor.hpp"
 #include "actor/test_mesh_actor.hpp"
 #include "component/instanced_mesh_component.hpp"
+#include "rrt.hpp"
 #define _USE_MATH_DEFINES  // for C++
 #include <cassert>
 #include <chrono>
@@ -98,6 +99,7 @@ void Game::loadGameObjects()
     addActor(std::move(camera));
 
     m_grid = std::move(std::make_unique<Grid>());
+    m_rrt  = std::move(std::make_unique<RRT>(*this, localizatoinActorId));
 }
 
 void Game::updateDeltaT()
