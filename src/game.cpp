@@ -100,6 +100,8 @@ void Game::loadGameObjects()
 
     m_grid = std::move(std::make_unique<Grid>());
     m_rrt  = std::move(std::make_unique<RRT>(*this, localizatoinActorId));
+
+    addActor(std::move(std::make_unique<RobotActor>(*this, "no1", localizatoinActorId)));
 }
 
 void Game::updateDeltaT()
