@@ -97,4 +97,32 @@ std::vector<wu::Vec2> LocalizationMapActor::getPassPixels() const
 
     return passPixels;
 }
+
+wu::Vec2 LocalizationMapActor::toPixelSpace(const wu::Vec2& worldSpacePos) const
+{
+    const auto&  localizationTex = m_game.loadTexture(m_localizationImgPath);
+    const double imgWidth        = localizationTex.getWidth();
+    const double imgHeight       = localizationTex.getHeight();
+    const double fieldWidth      = imgWidth * 0.05;
+    const double fieldHeight     = imgHeight * 0.05;
+
+    wu::Vec2 imgCenterCoord = worldSpacePos - wu::Vec2(fieldWidth / 2.0, fieldHeight / 2.0) - m_origin;
+    // 左下が原点でy軸上にflipしてloadされているから、この読み方で行う
+    wu::Vec2 cvCoord = imgCenterCoord + wu::Vec2(fieldWidth / 2.0, fieldHeight / 2.0);
+
+    return cvCoord * 20;
+}
+
+wu::Vec2 LocalizationMapActor::toWorldSpace(const wu::Vec2& pixelSpacePos) const
+{
+    const auto&  localizationTex = m_game.loadTexture(m_localizationImgPath);
+    const double imgWidth        = localizationTex.getWidth();
+    const double imgHeight       = localizationTex.getHeight();
+    const double fieldWidth      = imgWidth * 0.05;
+    const double fieldHeight     = imgHeight * 0.05;
+
+    wu::Vec2 cvCoord        = pixelSpacePos * 0.05;
+    wu::Vec2 imgCenterCoord = cvCoord - wu::Vec2(fieldWidth / 2.0, fieldHeight / 2.0);
+    return imgCenterCoord + wu::Vec2(fieldWidth / 2.0, fieldHeight / 2.0) + m_origin;
+}
 }  // namespace wander_csm_test
