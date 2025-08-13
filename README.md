@@ -12,6 +12,12 @@ cmake --build . -j 8
 ```
 
 # Note
+## dpkg-query: libxcb-cursor-dev に一致するパッケージが見つかりません
+見つからなかったパッケージをapt-get install
+```
+sudo apt-get install -y libxcb-cursor-dev
+```
+
 ## Windows11 WSL2
 Please replace conanfile.txt to below and remove glfw from "requires".
 ```
