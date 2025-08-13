@@ -75,7 +75,7 @@ void Game::init()
     compileShader("spriteShader", std::string(SHADER_PATH) + "test_mesh.vert", std::string(SHADER_PATH) + "sprite.frag");
     compileShader("localizationMapShader", std::string(SHADER_PATH) + "test_mesh.vert", std::string(SHADER_PATH) + "localization_map.frag");
     compileShader("gridShader", std::string(SHADER_PATH) + "grid.vert", std::string(SHADER_PATH) + "grid.frag");
-    compileShader("instancedMeshShader", std::string(SHADER_PATH) + "instanced_mesh.vert", std::string(SHADER_PATH) + "test_mesh.frag");
+    compileShader("instancedMeshShader", std::string(SHADER_PATH) + "instanced_mesh.vert", std::string(SHADER_PATH) + "instanced_mesh.frag");
 
     m_textureShadowMap = std::move(std::make_unique<TextureShadowMap>(1024, 1024));
 
