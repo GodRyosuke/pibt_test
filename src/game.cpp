@@ -38,6 +38,11 @@ Game::Game()
 
 Game::~Game()
 {
+    m_grid.release();
+    m_actors.clear();
+    m_shaders.clear();
+    m_textures.clear();
+    m_meshes.clear();
     if (m_glfwWindow) {
         glfwDestroyWindow(m_glfwWindow);
     }
