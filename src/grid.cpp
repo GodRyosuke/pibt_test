@@ -61,9 +61,7 @@ Grid::Grid()
     indices.emplace_back(index++);
     indices.emplace_back(index++);
 
-    std::shared_ptr<VertexArray> vao(new VertexArray(vertices, {}, {}, {}, indices));
-
-    m_vao        = std::move(VertexArray(vertices, colors, {}, {}, indices));
+    m_vao = std::move(std::unique_ptr<VertexArray>(new VertexArray(vertices, colors, {}, {}, indices)));
     m_numIndices = index;
 }
 
