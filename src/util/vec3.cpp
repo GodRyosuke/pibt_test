@@ -39,6 +39,11 @@ float Vec3::norm() const
     return std::sqrt(m_x * m_x + m_y * m_y + m_z * m_z);
 }
 
+double Vec3::sqNorm() const
+{
+    return m_x * m_x + m_y * m_y + m_z * m_z;
+}
+
 void Vec3::operator=(const Vec3& vec)
 {
     m_x = vec.m_x;

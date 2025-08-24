@@ -27,6 +27,7 @@ public:
     Vec3         cross(const Vec3& other) const;
     void         normalize();
     float        norm() const;
+    double       sqNorm() const;
     const float* getPtr() const { &m_x; }
     void         operator=(const Vec3& vec);
     Vec3         operator+(const Vec3& vec) const;
