@@ -7,6 +7,7 @@
 #include <vector>
 #include "util/wander_math.hpp"
 #include "vertex_array.hpp"
+#include <memory>
 
 namespace wander_csm_test {
 class Mesh
@@ -29,7 +30,7 @@ public:
     };
 
     Mesh(const std::string& path);
-    const VertexArray&    getVAO() const { return m_vao; }
+    const VertexArray&    getVAO() const { return *m_vao; }
     std::size_t           getSubMeshNum() const { return m_basicMeshEntries.size(); }
     const BasicMeshEntry& getSubMeshEntry(std::size_t idx) const { return m_basicMeshEntries[idx]; }
 
@@ -50,6 +51,6 @@ private:
     unsigned int                m_numVertices;
     unsigned int                m_numIndices;
 
-    VertexArray m_vao;
+    std::unique_ptr<VertexArray> m_vao;
 };
 }  // namespace wander_csm_test
