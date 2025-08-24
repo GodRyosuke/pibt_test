@@ -198,6 +198,10 @@ void Game::update()
     if ((glfwWindowShouldClose(m_glfwWindow)) ||
         (glfwGetKey(m_glfwWindow, 'Q') == GLFW_PRESS) ||
         (glfwGetKey(m_glfwWindow, GLFW_KEY_ESCAPE) == GLFW_PRESS)) {
+        for (auto& actor : m_actors) {
+            actor.second->shutdown();
+        }
+
         m_isRunning = false;
     }
 

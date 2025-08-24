@@ -14,7 +14,11 @@ RobotActor::RobotActor(Game& game, const std::string& name, const std::string& l
       m_velocity(0.5),
       m_nextGoalIdx(-1),
       m_angle(wu::PI / 2.0),
-      m_color(color)
+      m_color(color),
+      m_priority(0),
+      m_robotNames({"no1", "no2"}),
+      m_state(NOT_ASSIGNED),
+      m_rrt(game, localizationMapId)
 {
     MeshComponent& meshComponent = game.createMeshComponent(getId(), std::string(ASSET_PATH) + "robot_agent/robot_agent.obj", "testMeshShader");
     meshComponent.setColor(m_color);
@@ -26,21 +30,107 @@ RobotActor::RobotActor(Game& game, const std::string& name, const std::string& l
     InstancedMeshComponent& instancedMeshComponent = game.createInstancedMeshComponent(getId(), std::string(ASSET_PATH) + "circle/circle.obj", "instancedMeshShader");
     m_instanceMeshCompId                           = instancedMeshComponent.getId();
     addComponent(instancedMeshComponent);
+
+    initializePriority();
+}
+
+RobotActor::~RobotActor()
+{
+    m_rrt.stopPlan();
 }
 
 void RobotActor::updateActor()
 {
-    if ((m_goalQueue.size() != 0) && (m_nextGoalIdx == -1)) {
+    m_rrt.update();
+    if ((m_goalQueue.size() != 0) && (m_nextGoalIdx == -1) && (m_state == NOT_ASSIGNED)) {
         // 次の目的地への経路計画を実行
-        planGlobalPath(m_goalQueue.front());
-        m_goalQueue.pop();
+        m_state = PLANNING;
+        planGlobalPath(m_goalQueue.front(), {});
+        return;
+    }
+
+    if (m_state == PLANNING) {
+        std::cout << "in planning" << std::endl;
+        if (m_rrt.isPlanFinished()) {
+            std::cout << "plan finished in robot update" << std::endl;
+            auto globalPathReverse = m_rrt.getPlanResult();
+
+            if (globalPathReverse.size() == 0) {
+                m_nextGoalIdx = -1;
+                m_state       = NOT_ASSIGNED;
+                m_goalQueue.pop();
+                return;
+            }
+
+            m_state                     = MOVEING;
+            const auto& localizationMap = m_game.getActor<LocalizationMapActor>(m_localizatinMapActorId);
+            m_globalPath.clear();
+            m_globalPath.reserve(globalPathReverse.size());
+            for (int i = globalPathReverse.size() - 1; i >= 0; i--) {
+                const auto& path = globalPathReverse[i];
+                m_globalPath.emplace_back(wu::Vec3(path.x(), path.y(), 0));
+            }
+            const auto& currentGoal = m_goalQueue.front();
+            m_globalPath.emplace_back(wu::Vec3(currentGoal.x(), currentGoal.y(), 0));
+            m_nextGoalIdx = 0;
+
+            renderGlobalPath();
+        }
         return;
     }
 
     if (m_nextGoalIdx == -1) {
         return;
     }
-    auto&        currentPos   = getPosition();
+
+    // 目的地へのナビゲーション
+    auto& currentPos = getPosition();
+
+    // 衝突しそうな機体がないかチェック
+    std::vector<wu::Vec2> obstacls;
+    for (const auto& name : m_robotNames) {
+        const auto robots = m_game.getActorByName<RobotActor>(name);
+        if (robots.size() == 0) {
+            continue;
+        }
+        const auto& robot = robots[0].get();
+        if (robot.getName() == getName()) {
+            continue;
+        }
+        // 自分自身ではなかったら
+
+        const auto& robotPos = robot.getPosition();
+        if ((currentPos - robotPos).sqNorm() > 1) {
+            if (m_resolveConflictRobots.size() > 0) {
+                // 衝突が解消している
+                auto iter = std::find(m_resolveConflictRobots.begin(), m_resolveConflictRobots.end(), name);
+                m_resolveConflictRobots.erase(iter);
+            }
+            continue;
+        }
+        // 1mより近くに接近したら
+        if (m_priority > robot.getPriority()) {
+            // 自分より低いpriorityのロボットが接近してきた場合、相手が移動するまで待機
+            return;
+        }
+        auto iter = std::find(m_resolveConflictRobots.begin(), m_resolveConflictRobots.end(), name);
+        if (iter != m_resolveConflictRobots.end()) {
+            // すでに衝突の解決をしているロボットなら
+            continue;
+        }
+
+        // 自分がほかのロボットよりpriorityが低ければ
+        obstacls.emplace_back(wu::Vec2(robotPos.x(), robotPos.y()));
+        m_resolveConflictRobots.emplace_back(robot.getName());
+    }
+
+    const auto& currentGoal = m_goalQueue.front();
+
+    if (obstacls.size()) {
+        planGlobalPath(currentGoal, obstacls);
+        m_state = PLANNING;
+    }
+
     const double deltaT       = m_game.getDeltaT();
     double       nextGoalDist = (m_globalPath[m_nextGoalIdx] - currentPos).norm();
     while (true) {
@@ -51,6 +141,8 @@ void RobotActor::updateActor()
             // 目的地へ到着
             m_nextGoalIdx = -1;
             std::cout << "Robot \"" << getName() << "\" has reached the destination: " << currentPos.x() << ", " << currentPos.y() << std::endl;
+            m_state = NOT_ASSIGNED;
+            m_goalQueue.pop();
             return;
         }
         if (m_nextGoalIdx == (m_globalPath.size() - 1)) {
@@ -76,25 +168,24 @@ void RobotActor::updateActor()
     setRotation(m_angle - wu::PI / 2.0);
 }
 
-void RobotActor::planGlobalPath(const wu::Vec2& goal)
+void RobotActor::shutdown()
+{
+    m_rrt.stopPlan();
+    m_state = NOT_ASSIGNED;
+}
+
+void RobotActor::planGlobalPath(const wu::Vec2& goal, const std::vector<wu::Vec2>& obstacls)
 {
     // RRTで経路計画
-    auto&       rrt        = m_game.getRRT();
     const auto& currentPos = getPosition();
+    std::cout << "start planning: " << currentPos.x() << " " << currentPos.y() << std::endl;
 
-    auto globalPathPixelSpace = rrt.plan(wu::Vec2(currentPos.x(), currentPos.y()), goal);
+    m_rrt.startPlan(wu::Vec2(currentPos.x(), currentPos.y()), goal, obstacls);
+}
 
-    const auto& localizationMap = m_game.getActor<LocalizationMapActor>(m_localizatinMapActorId);
-
-    m_globalPath.clear();
-    m_globalPath.reserve(globalPathPixelSpace.size());
-    for (int i = globalPathPixelSpace.size() - 1; i >= 0; i--) {
-        wu::Vec2 posWorldSpace = localizationMap.toWorldSpace(globalPathPixelSpace[i]);
-        m_globalPath.emplace_back(wu::Vec3(posWorldSpace.x(), posWorldSpace.y(), 0));
-    }
-
-    m_nextGoalIdx = 0;
-
+void RobotActor::renderGlobalPath()
+{
+    // 経路の描画準備
     const auto toNodeModelTransform = [](const wu::Vec3& position) -> InstancedMeshComponent::ShaderMat4 {
         const auto scale          = wu::Mat4::scale(wu::Vec3(0.3 / 2.0, 0.3 / 2.0, 0.3 / 2.0));
         const auto translation    = wu::Mat4::translation(position);
@@ -115,5 +206,18 @@ void RobotActor::planGlobalPath(const wu::Vec2& goal)
 
         instancedMeshComponent.addData(data);
     }
+}
+
+void RobotActor::initializePriority()
+{
+    unsigned int maxPriority = 0;
+    for (const auto& name : m_robotNames) {
+        const auto robots = m_game.getActorByName<RobotActor>(name);
+        if (robots.size() == 0) {
+            continue;
+        }
+        maxPriority = std::max(robots[0].get().getPriority(), maxPriority);
+    }
+    m_priority = maxPriority + 1;
 }
 }  // namespace wander_csm_test

@@ -22,12 +22,14 @@ public:
     Actor(const Actor&) = delete;
     Actor(Actor&&) noexcept;
     virtual ~Actor();
+    virtual void shutdown() {}
 
     void update();
     void input(const InputEvent& event);
 
     const std::string& getId() const { return m_id; }
     const std::string& getName() const { return m_name; }
+    void               setName(const std::string& name) { m_name = name; }
     // template <typename ChildActor>
     // std::unique_ptr<ChildActor> get_child_ptr()
     // {

@@ -14,14 +14,42 @@ RRT::RRT(const Game& game, const std::string& localizationMapActorId)
       m_nodeDistance(0.5),
       m_rrtStarSearchGamma(250.0),
       m_maxIterNum(2000),
-      m_nearGoalDist(0.5)
+      m_nearGoalDist(0.5),
+      m_obstacleDist(1.0),
+      m_isFinishedCalcRRT(true),
+      m_isStopPlanning(false)
 {
     const auto& localizationMap = m_game.getActor<LocalizationMapActor>(m_localizatinMapActorId);
     m_passPixels                = localizationMap.getPassPixels();
     m_passPixelSelectDist       = std::uniform_int_distribution<int>(0, m_passPixels.size() - 1);
 }
 
-std::vector<wu::Vec2> RRT::plan(const wu::Vec2& startPos, const wu::Vec2& goalPos)
+void RRT::update()
+{
+    if (m_isFinishedCalcRRT) {
+        return;
+    }
+
+    if (m_planFuture.wait_for(std::chrono::milliseconds(0)) == std::future_status::ready) {
+        m_planResult        = m_planFuture.get();
+        m_isFinishedCalcRRT = true;
+        std::cout << "finished rrt in rrt update" << std::endl;
+    }
+}
+
+void RRT::startPlan(const wu::Vec2& startPos, const wu::Vec2& goalPos, const std::vector<wu::Vec2>& obstacles)
+{
+    m_planResult.clear();
+
+    std::cout << "start plan called: " << startPos.x() << " " << startPos.y() << std::endl;
+
+    m_planFuture        = std::async(std::launch::async, [this, startPos, goalPos, obstacles]() -> std::vector<wu::Vec2> {
+        return asyncPlan(startPos, goalPos, obstacles);
+    });
+    m_isFinishedCalcRRT = false;
+}
+
+std::vector<wu::Vec2> RRT::asyncPlan(const wu::Vec2& startPos, const wu::Vec2& goalPos, const std::vector<wu::Vec2>& obstacles)
 {
     const auto&    localizationMap = m_game.getActor<LocalizationMapActor>(m_localizatinMapActorId);
     const wu::Vec2 pixelStartPos   = localizationMap.toPixelSpace(startPos);
@@ -51,7 +79,15 @@ std::vector<wu::Vec2> RRT::plan(const wu::Vec2& startPos, const wu::Vec2& goalPo
     nodes.emplace_back(Node(-1, pixelStartPos, 0));
 
     // p1は障害物上にないか？
-    const auto isCollide1Point = [&localizationMap](const wu::Vec2& p) -> bool {
+    const auto isCollide1Point = [&obstacles, this](const wu::Vec2& p) -> bool {
+        const auto& localizationMap        = m_game.getActor<LocalizationMapActor>(m_localizatinMapActorId);
+        double      obstacleDistPixelSpace = m_obstacleDist * 20;
+        for (const auto& obstacle : obstacles) {
+            wu::Vec2 obstaclePixelSpace = localizationMap.toPixelSpace(obstacle);
+            if ((obstaclePixelSpace - p).sqNorm() < (obstacleDistPixelSpace * obstacleDistPixelSpace)) {
+                return true;
+            }
+        }
         return !localizationMap.isAvailablePixelSpace(p);
     };
 
@@ -82,6 +118,10 @@ std::vector<wu::Vec2> RRT::plan(const wu::Vec2& startPos, const wu::Vec2& goalPo
     const double pixelNearGoalDist = m_nearGoalDist * 20;
 
     for (std::size_t iterNum = 0;; iterNum++) {
+        if (m_isStopPlanning.load()) {
+            return {};
+        }
+
         int      selectedPassPixelIdx = m_passPixelSelectDist(m_randomEngine);
         wu::Vec2 selectedPixelPos     = m_passPixels[selectedPassPixelIdx];
         if (m_realDist(m_randomEngine) < m_goalSelectionProb) {
@@ -160,11 +200,12 @@ std::vector<wu::Vec2> RRT::plan(const wu::Vec2& startPos, const wu::Vec2& goalPo
         }
 
         const auto& currentNode = nodes[currentNodeIdx];
-        const auto& pos         = currentNode.pos;
+        const auto& pos         = localizationMap.toWorldSpace(currentNode.pos);
         result.emplace_back(pos);
         currentNodeIdx = currentNode.parent;
     }
 
+    std::cout << "rrt finished" << std::endl;
     return result;
 }
 }  // namespace wander_csm_test

@@ -42,12 +42,22 @@ public:
         }
         return static_cast<T&>(*iter->second);
     }
+    template <class T>
+    std::vector<std::reference_wrapper<T>> getActorByName(const std::string& name) const
+    {
+        std::vector<std::reference_wrapper<T>> actors;
+        for (const auto& iter : m_actors) {
+            if (iter.second->getName() == name) {
+                actors.emplace_back(static_cast<T&>(*iter.second));
+            }
+        }
+        return actors;
+    }
     const Mesh&    loadMesh(const std::string& meshPath);
     const Texture& loadTexture(const std::string& meshPath);
 
     double             getDeltaT() const { return m_deltaT; }
     const std::string& getCameraId() const { return m_cameraId; }
-    RRT&               getRRT() const { return *m_rrt; }
 
     MeshComponent&          createMeshComponent(const std::string& ownerId, const std::string& meshFilePath, const std::string& shaderName);
     InstancedMeshComponent& createInstancedMeshComponent(const std::string& ownerId, const std::string& meshFilePath, const std::string& shaderName);
@@ -87,8 +97,6 @@ private:
     InputEvent m_inputEvent;
 
     std::unique_ptr<Grid> m_grid;
-
-    std::unique_ptr<RRT> m_rrt;
 
     std::unordered_map<std::string, std::unique_ptr<Mesh>>    m_meshes;
     std::unordered_map<std::string, std::unique_ptr<Texture>> m_textures;
