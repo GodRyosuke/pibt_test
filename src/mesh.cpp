@@ -53,7 +53,7 @@ bool Mesh::load()
     }
 
     // VAO
-    m_vao = VertexArray(m_positions, m_normals, m_texCoords, m_tangents, m_indices);
+    m_vao = std::move(std::unique_ptr<VertexArray>(new VertexArray(m_positions, m_normals, m_texCoords, m_tangents, m_indices)));
 
     m_normals.clear();
     m_texCoords.clear();
